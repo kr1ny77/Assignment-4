@@ -180,3 +180,39 @@ class InvalidBoardSizeException extends Exception {
         return "Invalid board size";
     }
 }
+
+interface OrthogonalMoving {
+
+    int getOrthogonalDirectionVisibleValue(
+            Direction dir,
+            EntityPosition entityPosition,
+            Map<String, BoardEntity> boardData,
+            int boardSize
+    );
+
+    int travelOrthogonally(
+            Direction dir,
+            EntityPosition entityPosition,
+            InsectColor color,
+            Map<String, BoardEntity> boardData,
+            int boardSize
+    );
+}
+
+interface DiagonalMoving {
+
+    int getDiagonalDirectionVisibleValue(
+            Direction dir,
+            EntityPosition entityPosition,
+            Map<String, BoardEntity> boardData,
+            int boardSize
+    );
+
+    int travelDiagonally(
+            Direction dir,
+            EntityPosition entityPosition,
+            InsectColor color,
+            Map<String, BoardEntity> boardData,
+            int boardSize
+    );
+}
