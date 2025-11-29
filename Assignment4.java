@@ -83,7 +83,7 @@ enum InsectColor {
     BLUE,
     YELLOW;
 
-    public static InsectColor toColor(String s) {
+    public static InsectColor toColor(String s) throws InvalidInsectColorException {
         switch (s) {
             case "Red":
                 return RED;
@@ -160,6 +160,13 @@ class InvalidInsectTypeException extends Exception {
     }
 }
 
+class InvalidInsectColorException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Invalid insect color";
+    }
+}
+
 class InvalidNumberOfFoodPointsException extends Exception {
     @Override
     public String getMessage() {
@@ -215,4 +222,8 @@ interface DiagonalMoving {
             Map<String, BoardEntity> boardData,
             int boardSize
     );
+}
+
+class Butterfly extends Insect implements OrthogonalMoving {
+
 }
