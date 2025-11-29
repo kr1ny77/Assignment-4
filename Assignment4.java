@@ -131,3 +131,52 @@ abstract class Insect extends BoardEntity {
 
     public abstract int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize);
 }
+
+class TwoEntitiesOnSamePositionException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Two entities in the same position";
+    }
+}
+
+class DuplicatensectException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Duplicate insects";
+    }
+}
+
+class InvalidEntityPositionException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Invalid entity position";
+    }
+}
+
+class InvalidInsectTypeException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Invalid insect type";
+    }
+}
+
+class InvalidNumberOfFoodPointsException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Invalid number of food points";
+    }
+}
+
+class InvalidNumberOfInsectsException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Invalid number of insects";
+    }
+}
+
+class InvalidBoardSizeException extends Exception {
+    @Override
+    public String getMessage() {
+        return "Invalid board size";
+    }
+}
