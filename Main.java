@@ -195,8 +195,8 @@ class Board {
 }
 
 class EntityPosition {
-    private int x;
-    private int y;
+    private final int x;
+    private final int y;
 
     public EntityPosition(int x, int y) {
         this.x = x;
@@ -781,8 +781,10 @@ class Ant extends Insect implements DiagonalMoving, OrthogonalMoving {
                 sum += food.value;
                 boardData.remove(key);
             }
-            if (item instanceof Insect) {
-                break;
+            if (item instanceof Insect insect) {
+                if (insect.color != color) {
+                    break;
+                }
             }
             x += dx;
             y += dy;

@@ -1,4 +1,0 @@
-Red Ant South-East 26
-Red Spider South-West 1
-Red Butterfly West 1
-Green Butterfly North 3
