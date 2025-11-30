@@ -716,3 +716,123 @@ class Ant extends Insect implements DiagonalMoving, OrthogonalMoving {
         }
     }
 }
+
+class Grasshopper extends Insect {
+    public Grasshopper(EntityPosition entityPosition, InsectColor color) {
+        super(entityPosition, color);
+    }
+
+    public int getOrthogonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition,
+                                                  Map<String, BoardEntity> boardData, int boardSize) {
+        int dx;
+        int dy;
+        switch (dir) {
+            case N:
+                dx = -1;
+                dy = 0;
+                break;
+            case S:
+                dx = 1;
+                dy = 0;
+                break;
+            case E:
+                dx = 0;
+                dy = 1;
+                break;
+            case W:
+                dx = 0;
+                dy = -1;
+                break;
+            default:
+                return 0;
+        }
+        int x = entityPosition.getX() + (2 * dx);
+        int y = entityPosition.getY() + (2 * dy);
+        int sum = 0;
+        while (x >= 1 && x <= boardSize && y >= 1 && y <= boardSize) {
+            String key = x + "," + y;
+            BoardEntity item = boardData.get(key);
+            if (item instanceof FoodPoint food) {
+                sum += food.value;
+            }
+            x += 2 * dx;
+            y += 2 * dy;
+        }
+        return sum;
+    }
+
+    public int travelOrthogonally(Direction dir, EntityPosition entityPosition, InsectColor color,
+                                  Map<String, BoardEntity> boardData, int boardSize) {
+        int dx;
+        int dy;
+        switch (dir) {
+            case N:
+                dx = -1;
+                dy = 0;
+                break;
+            case S:
+                dx = 1;
+                dy = 0;
+                break;
+            case E:
+                dx = 0;
+                dy = 1;
+                break;
+            case W:
+                dx = 0;
+                dy = -1;
+                break;
+            default:
+                return 0;
+        }
+        int x = entityPosition.getX() + (2 * dx);
+        int y = entityPosition.getY() + (2 * dy);
+        String oldKey = entityPosition.getX() + "," + entityPosition.getY();
+        boardData.remove(oldKey);
+        int sum = 0;
+        while (x >= 1 && x <= boardSize && y >= 1 && y <= boardSize) {
+            String key = x + "," + y;
+            BoardEntity item = boardData.get(key);
+            if (item instanceof FoodPoint food) {
+                sum += food.value;
+                boardData.remove(key);
+            }
+            if (item instanceof Insect) {
+                break;
+            }
+            x += 2 * dx;
+            y += 2 * dy;
+        }
+        return sum;
+    }
+
+    public Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize) {
+        Direction dir = Direction.N;
+        Direction bestDir = Direction.N;
+        int bestValue = getOrthogonalDirectionVisibleValue(dir, this.entityPosition, boardData, boardSize);
+        dir = Direction.E;
+        int value = getOrthogonalDirectionVisibleValue(dir, this.entityPosition, boardData, boardSize);
+        if  (value > bestValue) {
+            bestValue = value;
+            bestDir = dir;
+        }
+        dir = Direction.S;
+        value = getOrthogonalDirectionVisibleValue(dir, this.entityPosition, boardData, boardSize);
+        if  (value > bestValue) {
+            bestValue = value;
+            bestDir = dir;
+        }
+        dir = Direction.W;
+        value = getOrthogonalDirectionVisibleValue(dir, this.entityPosition, boardData, boardSize);
+        if  (value > bestValue) {
+            bestValue = value;
+            bestDir = dir;
+        }
+        return bestDir;
+    }
+
+    public int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize) {
+        return travelOrthogonally(dir, entityPosition, color, boardData, boardSize);
+    }
+
+}
