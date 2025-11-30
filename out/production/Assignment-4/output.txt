@@ -1,0 +1,6 @@
+Red Grasshopper North 5
+Green Butterfly North 5
+Blue Ant North 7
+Blue Spider North-West 3
+Green Grasshopper South 2
+Yellow Spider North-East 0

@@ -1,0 +1,7 @@
+4
+2
+2
+Red Grasshopper 3 2
+Green Spider 3 3
+100 3 4
+50 1 2

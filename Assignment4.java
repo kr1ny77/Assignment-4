@@ -1,9 +1,144 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.io.IOException;
 
 public class Assignment4 {
+    private static Board gameBoard;
     public static void main(String[] args) {
+        String error = null;
+        final int minSize = 4;
+        final int maxSize = 1000;
+        final int minNumber = 1;
+        final int maxNumberInsects = 16;
+        final int maxNumberFood = 200;
+        List<Insect> insectsInOrder = new ArrayList<>();
+        List<String> results = new ArrayList<>();
+        try (Scanner sc = new Scanner(new File("input.txt"))) {
 
+            int d = sc.nextInt();
+            if (d < minSize || d > maxSize) {
+                throw new InvalidBoardSizeException();
+            }
+
+            int n = sc.nextInt();
+            if (n < minNumber || n > maxNumberInsects) {
+                throw new InvalidNumberOfInsectsException();
+            }
+
+            int m = sc.nextInt();
+            if (m < minNumber || m > maxNumberFood) {
+                throw new InvalidNumberOfFoodPointsException();
+            }
+
+            gameBoard = new Board(d);
+            Set<String> typeColorUsed = new HashSet<>();
+            Set<String> occupiedCells = new HashSet<>();
+
+            for (int i = 0; i < n; i++) {
+                String colorStr = sc.next();
+                String typeStr  = sc.next();
+                int x = sc.nextInt();
+                int y = sc.nextInt();
+
+                InsectColor color = InsectColor.toColor(colorStr);
+
+                Insect insect;
+                EntityPosition pos = new EntityPosition(x, y);
+                switch (typeStr) {
+                    case "Ant":
+                        insect = new Ant(pos, color);
+                        break;
+                    case "Butterfly":
+                        insect = new Butterfly(pos, color);
+                        break;
+                    case "Spider":
+                        insect = new Spider(pos, color);
+                        break;
+                    case "Grasshopper":
+                        insect = new Grasshopper(pos, color);
+                        break;
+                    default:
+                        throw new InvalidInsectTypeException();
+                }
+
+                if (x < 1 || x > d || y < 1 || y > d) {
+                    throw new InvalidEntityPositionException();
+                }
+
+                String colorKey = typeStr + "-" + colorStr;
+                if (typeColorUsed.contains(colorKey)) {
+                    throw new DuplicateInsectException();
+                }
+                typeColorUsed.add(colorKey);
+
+                String cellKey = x + "," + y;
+                if (occupiedCells.contains(cellKey)) {
+                    throw new TwoEntitiesOnSamePositionException();
+                }
+                occupiedCells.add(cellKey);
+
+                gameBoard.addEntity(insect);
+                insectsInOrder.add(insect);
+            }
+
+            for (int i = 0; i < m; i++) {
+                int amount = sc.nextInt();
+                int x = sc.nextInt();
+                int y = sc.nextInt();
+
+                if (x < 1 || x > d || y < 1 || y > d) {
+                    throw new InvalidEntityPositionException();
+                }
+
+                String cellKey = x + "," + y;
+                if (occupiedCells.contains(cellKey)) {
+                    throw new TwoEntitiesOnSamePositionException();
+                }
+                occupiedCells.add(cellKey);
+
+                gameBoard.addEntity(new FoodPoint(new EntityPosition(x, y), amount));
+            }
+
+            for (Insect insect : insectsInOrder) {
+                Direction dir = gameBoard.getDirection(insect);
+                int eaten = gameBoard.getDirectionSum(insect);
+
+                String colorStr = insect.color.name().charAt(0) + insect.color.name().substring(1).toLowerCase();
+                String name = insect.getClass().getSimpleName();
+
+                String line = colorStr + " " + name + " " + dir.getTextRepresentation() + " " + eaten;
+                results.add(line);
+            }
+
+        } catch (InvalidBoardSizeException | InvalidNumberOfInsectsException
+                 | InvalidNumberOfFoodPointsException
+                 | InvalidInsectColorException
+                 | InvalidInsectTypeException
+                 | InvalidEntityPositionException
+                 | DuplicateInsectException
+                 | TwoEntitiesOnSamePositionException e) {
+            error = e.getMessage();
+        } catch (IOException e) {
+        }
+
+        try (FileWriter fw = new FileWriter("output.txt")) {
+            if (error != null) {
+                fw.write(error + System.lineSeparator());
+            } else {
+                for (String s : results) {
+                    fw.write(s);
+                    fw.write(System.lineSeparator());
+                }
+            }
+        } catch (IOException ignored) {
+        }
     }
 }
 
