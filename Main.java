@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.io.IOException;
 
-public class Assignment4 {
+public class Main {
     private static Board gameBoard;
     public static void main(String[] args) {
         String error = null;
