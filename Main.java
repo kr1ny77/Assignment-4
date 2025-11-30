@@ -441,8 +441,10 @@ class Butterfly extends Insect implements OrthogonalMoving {
                 sum += food.value;
                 boardData.remove(key);
             }
-            if (item instanceof Insect) {
-                break;
+            if (item instanceof Insect insect) {
+                if (insect.color != color) {
+                    break;
+                }
             }
             x += dx;
             y += dy;
@@ -565,8 +567,10 @@ class Spider extends Insect implements DiagonalMoving {
                 sum += food.value;
                 boardData.remove(key);
             }
-            if (item instanceof Insect) {
-                break;
+            if (item instanceof Insect insect) {
+                if (insect.color != color) {
+                    break;
+                }
             }
             x += dx;
             y += dy;
@@ -689,8 +693,10 @@ class Ant extends Insect implements DiagonalMoving, OrthogonalMoving {
                 sum += food.value;
                 boardData.remove(key);
             }
-            if (item instanceof Insect) {
-                break;
+            if (item instanceof Insect insect) {
+                if (insect.color != color) {
+                    break;
+                }
             }
             x += dx;
             y += dy;
@@ -932,8 +938,10 @@ class Grasshopper extends Insect {
                 sum += food.value;
                 boardData.remove(key);
             }
-            if (item instanceof Insect) {
-                break;
+            if (item instanceof Insect insect) {
+                if (insect.color != color) {
+                    break;
+                }
             }
             x += 2 * dx;
             y += 2 * dy;
