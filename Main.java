@@ -9,8 +9,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.io.IOException;
 
+
+/**
+ * Entry point of the insect board simulation.
+ * Reads input from input.txt, validates data, runs the simulation on the board
+ * and writes results or error message to output.txt.
+ */
 public class Main {
     private static Board gameBoard;
+    /**
+     * Runs the simulation: reads board size, insects, food points and produces the output file.
+     */
     public static void main(String[] args) {
         String error = null;
         final int minSize = 4;
@@ -68,7 +77,7 @@ public class Main {
                         throw new InvalidInsectTypeException();
                 }
 
-                if (x < 1 || x > d || y < 1 || y > d) {
+                if (x < minNumber || x > d || y < minNumber || y > d) {
                     throw new InvalidEntityPositionException();
                 }
 
@@ -93,7 +102,7 @@ public class Main {
                 int x = sc.nextInt();
                 int y = sc.nextInt();
 
-                if (x < 1 || x > d || y < 1 || y > d) {
+                if (x < minNumber || x > d || y < minNumber || y > d) {
                     throw new InvalidEntityPositionException();
                 }
 
@@ -117,13 +126,7 @@ public class Main {
                 results.add(line);
             }
 
-        } catch (InvalidBoardSizeException | InvalidNumberOfInsectsException
-                 | InvalidNumberOfFoodPointsException
-                 | InvalidInsectColorException
-                 | InvalidInsectTypeException
-                 | InvalidEntityPositionException
-                 | DuplicateInsectException
-                 | TwoEntitiesOnSamePositionException e) {
+        } catch (Exception e) {
             error = e.getMessage();
         } catch (IOException e) {
         }
@@ -142,6 +145,9 @@ public class Main {
     }
 }
 
+/**
+ * Represents one of the eight possible movement directions on the board.
+ */
 enum Direction {
     N("North"),
     E("East"),
@@ -152,51 +158,81 @@ enum Direction {
     SW("South-West"),
     NW("North-West");
 
-    private final String textRepresentation;
+    private String textRepresentation;
     private Direction(String text) {
         this.textRepresentation = text;
     }
-
+    /**
+     * Returns the text representation of this direction.
+     * @return text representation of the direction
+     */
     public String getTextRepresentation() {
         return textRepresentation;
     }
 }
-
+/**
+ * Represents the square game board holding insects and food points.
+ */
 class Board {
-    private final Map<String, BoardEntity> boardData;
-    private final int size;
-
+    private Map<String, BoardEntity> boardData;
+    private int size;
+    /**
+     * Creates a new board of the given size.
+     * @param boardSize size of the board (both width and height)
+     */
     public Board(int boardSize) {
         this.size = boardSize;
         this.boardData = new HashMap<>();
     }
-
+    /**
+     * Converts a board position to an internal key in the map.
+     * @param position board position
+     * @return string key in the form "x,y"
+     */
     private String toKey(EntityPosition position) {
         return position.getX() + "," + position.getY();
     }
-
+    /**
+     * Adds or replaces an entity at its position on the board.
+     * @param entity entity to add
+     */
     public void addEntity(BoardEntity entity) {
         boardData.put(toKey(entity.getEntityPosition()), entity);
     }
-
+    /**
+     * Returns the entity located at the given position.
+     * @param position board position to query
+     * @return entity at the position, or null if empty
+     */
     public BoardEntity getEntity(EntityPosition position) {
         return boardData.get(toKey(position));
     }
-
+    /**
+     * Computes the best movement direction for the given insect.
+     * @param insect insect for which to compute direction
+     * @return direction that provides the highest visible nutritional value
+     */
     public Direction getDirection(Insect insect) {
         return insect.getBestDirection(boardData, size);
     }
-
+    /**
+     * Calculates the total amount of food collected by moving the insect
+     * along its best direction and updates the board accordingly.
+     * @param insect insect that travels
+     * @return total value of food collected by the insect
+     */
     public int getDirectionSum(Insect insect) {
         Direction dir = getDirection(insect);
         return insect.travelDirection(dir, boardData, size);
     }
 
 }
-
+/**
+ * Immutable position of an entity on the board.
+ */
 class EntityPosition {
-    private final int x;
-    private final int y;
+    private int x;
+    private int y;
 
     public EntityPosition(int x, int y) {
         this.x = x;
@@ -211,13 +247,20 @@ class EntityPosition {
         return y;
     }
 }
-
+/**
+ * Represents possible colors of insects.
+ */
 enum InsectColor {
     RED,
     GREEN,
     BLUE,
     YELLOW;
-
+    /**
+     * Converts a string from input into the corresponding insect color.
+     * @param s color string from input
+     * @return matching InsectColor value
+     * @throws InvalidInsectColorException if the color string is not supported
+     */
     public static InsectColor toColor(String s) throws InvalidInsectColorException {
         switch (s) {
             case "Red":
@@ -233,7 +276,9 @@ enum InsectColor {
         }
     }
 }
-
+/**
+ * Base class for any entity that can be placed on the board.
+ */
 abstract class BoardEntity {
     protected EntityPosition entityPosition;
 
@@ -245,7 +290,9 @@ abstract class BoardEntity {
         return entityPosition;
     }
 }
-
+/**
+ * Food point on the board with a certain value.
+ */
 class FoodPoint extends BoardEntity {
     protected int value;
     public FoodPoint(EntityPosition position, int value) {
@@ -253,7 +300,9 @@ class FoodPoint extends BoardEntity {
         this.value = value;
     }
 }
-
+/**
+ * Abstract base class for all insects that can move and collect food.
+ */
 abstract class Insect extends BoardEntity {
     protected InsectColor color;
 
@@ -261,77 +310,129 @@ abstract class Insect extends BoardEntity {
         super(entityPosition);
         this.color = color;
     }
-
+    /**
+     * Computes the best movement direction for this insect on the board.
+     * @param boardData map of board positions to entities
+     * @param boardSize size of the board
+     * @return best direction for this insect
+     */
     public abstract Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize);
-
+    /**
+     * Moves the insect in the given direction, collects food and updates the board.
+     * @param dir       direction in which to travel
+     * @param boardData map of board positions to entities
+     * @param boardSize size of the board
+     * @return total value of the food collected along the path
+     */
     public abstract int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize);
 }
-
+/**
+ * Base class for all custom game exceptions.
+ */
+class Exception extends Throwable {
+    public String getMessage() {
+        return "Something went wrong";
+    }
+}
+/**
+ * Thrown when two entities attempt to occupy the same position.
+ */
 class TwoEntitiesOnSamePositionException extends Exception {
     @Override
     public String getMessage() {
         return "Two entities in the same position";
     }
 }
-
+/**
+ * Thrown when an insect with duplicate type and color appears in the input.
+ */
 class DuplicateInsectException extends Exception {
     @Override
     public String getMessage() {
         return "Duplicate insects";
     }
 }
-
+/**
+ * Thrown when an entity position lies outside the board.
+ */
 class InvalidEntityPositionException extends Exception {
     @Override
     public String getMessage() {
         return "Invalid entity position";
     }
 }
-
+/**
+ * Thrown when an unknown insect type is encountered in the input.
+ */
 class InvalidInsectTypeException extends Exception {
     @Override
     public String getMessage() {
         return "Invalid insect type";
     }
 }
-
+/**
+ * Thrown when an unknown insect color is encountered in the input.
+ */
 class InvalidInsectColorException extends Exception {
     @Override
     public String getMessage() {
         return "Invalid insect color";
     }
 }
-
+/**
+ * Thrown when the number of food points in the input is invalid.
+ */
 class InvalidNumberOfFoodPointsException extends Exception {
     @Override
     public String getMessage() {
         return "Invalid number of food points";
     }
 }
-
+/**
+ * Thrown when the number of insects in the input is invalid.
+ */
 class InvalidNumberOfInsectsException extends Exception {
     @Override
     public String getMessage() {
         return "Invalid number of insects";
     }
 }
-
+/**
+ * Thrown when the board size in the input is invalid.
+ */
 class InvalidBoardSizeException extends Exception {
     @Override
     public String getMessage() {
         return "Invalid board size";
     }
 }
-
+/**
+ * Defines behavior for insects that can move in orthogonal directions.
+ */
 interface OrthogonalMoving {
-
+    /**
+     * Computes the visible total food value in the given orthogonal direction.
+     * @param dir           orthogonal direction to check
+     * @param entityPosition current position of the insect
+     * @param boardData     map of board positions to entities
+     * @param boardSize     size of the board
+     * @return sum of visible food values in that direction
+     */
     int getOrthogonalDirectionVisibleValue(
             Direction dir,
             EntityPosition entityPosition,
             Map<String, BoardEntity> boardData,
             int boardSize
     );
-
+    /**
+     * Moves orthogonally in the given direction, collecting food until a stopping condition.
+     * @param dir           direction of travel
+     * @param entityPosition starting position of the insect
+     * @param color         color of the insect (used when encountering other insects)
+     * @param boardData     map of board positions to entities
+     * @param boardSize     size of the board
+     * @return total value of collected food
+     */
     int travelOrthogonally(
             Direction dir,
             EntityPosition entityPosition,
@@ -340,16 +441,33 @@ interface OrthogonalMoving {
             int boardSize
     );
 }
-
+/**
+ * Defines behavior for insects that can move diagonally.
+ */
 interface DiagonalMoving {
-
+    /**
+     * Computes the visible total food value in the given diagonal direction.
+     * @param dir           diagonal direction to check
+     * @param entityPosition current position of the insect
+     * @param boardData     map of board positions to entities
+     * @param boardSize     size of the board
+     * @return sum of visible food values in that direction
+     */
     int getDiagonalDirectionVisibleValue(
             Direction dir,
             EntityPosition entityPosition,
             Map<String, BoardEntity> boardData,
             int boardSize
     );
-
+    /**
+     * Moves diagonally in the given direction, collecting food until a stopping condition.
+     * @param dir           direction of travel
+     * @param entityPosition starting position of the insect
+     * @param color         color of the insect (used when encountering other insects)
+     * @param boardData     map of board positions to entities
+     * @param boardSize     size of the board
+     * @return total value of collected food
+     */
     int travelDiagonally(
             Direction dir,
             EntityPosition entityPosition,
@@ -358,7 +476,9 @@ interface DiagonalMoving {
             int boardSize
     );
 }
-
+/**
+ * Butterfly insect that moves and looks only in orthogonal directions.
+ */
 class Butterfly extends Insect implements OrthogonalMoving {
     public Butterfly(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
@@ -484,7 +604,9 @@ class Butterfly extends Insect implements OrthogonalMoving {
     }
 
 }
-
+/**
+ * Spider insect that moves and looks only in diagonal directions.
+ */
 class Spider extends Insect implements DiagonalMoving {
     public Spider(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
@@ -610,7 +732,9 @@ class Spider extends Insect implements DiagonalMoving {
     }
 
 }
-
+/**
+ * Ant insect that can move both orthogonally and diagonally.
+ */
 class Ant extends Insect implements DiagonalMoving, OrthogonalMoving {
     public Ant(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
@@ -859,7 +983,9 @@ class Ant extends Insect implements DiagonalMoving, OrthogonalMoving {
         }
     }
 }
-
+/**
+ * Grasshopper insect that moves orthogonally in jumps of length two.
+ */
 class Grasshopper extends Insect {
     public Grasshopper(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
